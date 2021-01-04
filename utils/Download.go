@@ -1,4 +1,4 @@
-package main
+package utils
 
 import (
 	"io"
@@ -6,9 +6,9 @@ import (
 	"os"
 )
 
-// DownloadFile will download a url to a local file. It's efficient because it will
+// Download will download a url to a local file. It's efficient because it will
 // write as it downloads and not load the whole file into memory.
-func download(filepath string, url string) error {
+func Download(filepath string, url string) error {
 
 	// Get the data
 	resp, err := http.Get(url)
