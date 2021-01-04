@@ -7,4 +7,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Build and push to Docker registry
-        run: docker run --rm -it -v /var/run/docker.sock:/var/run/docker.sock -e DOCKER_XRA=${{ secrets.DOCKER_XRA }} ahojukka5/gontti ahojukka5/gontti
+        run: docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -e DOCKER_XRA=${{ secrets.DOCKER_XRA }} ahojukka5/gontti ahojukka5/gontti
