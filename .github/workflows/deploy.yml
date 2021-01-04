@@ -1,4 +1,4 @@
-name: Deploy to
+name: Build and push to Docker registry
 
 on: push
 
