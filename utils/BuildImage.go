@@ -2,14 +2,32 @@ package utils
 
 import (
 	"bufio"
+	"bytes"
+	"encoding/json"
 	"log"
 	"net"
 	"strconv"
 	"strings"
 )
 
-// BuildImage builds and tags Docker image.
-func BuildImage() {
+// Stream struct
+type Stream struct {
+	Stream string `json:"stream"`
+}
+
+// ID struct
+type ID struct {
+	ID string `json:"ID"`
+}
+
+// Aux struct
+type Aux struct {
+	Aux ID `json:"aux"`
+}
+
+// BuildImage builds and tags Docker image. Tag must be given as input argument,
+// for example 'ahojukka5/anecdotes'. Returns id of image built.
+func BuildImage(tag string) string {
 	addr := "/var/run/docker.sock"
 	conn, err := net.Dial("unix", addr)
 	if err != nil {
@@ -17,10 +35,10 @@ func BuildImage() {
 	}
 	defer conn.Close()
 
-	cmd := "http://localhost/v1.40/build?remote=https://github.com/ahojukka5/anecdotes.git#master:/"
+	cmd := "http://localhost/v1.40/build?remote=https://github.com/" + tag + ".git#master:/"
 	msg := "POST " + cmd + " HTTP/1.1\r\nHost: *\r\n\r\n"
 
-	println("Send message to socket:")
+	println("## Send message to socket:")
 	println("---")
 	println(msg)
 	println("---")
@@ -50,10 +68,13 @@ func BuildImage() {
 		header += string(line)
 	}
 
-	println("\nHeader:")
+	println("\n## Header:\n")
 	println(header)
 
-	println("Chunks:")
+	var stream Stream
+	var aux Aux
+
+	println("## Build output:\n")
 	for {
 		content, err := reader.ReadBytes('\n')
 		if err != nil {
@@ -64,11 +85,11 @@ func BuildImage() {
 		if err != nil {
 			panic(err)
 		}
-		println("number of characters in chunk", contentLength)
+		// println("number of characters in chunk", contentLength)
 
 		if contentLength == 0 {
-			println("End of stream")
-			return
+			println("\n## End of build output\n")
+			break
 		}
 
 		buf := make([]byte, contentLength)
@@ -76,7 +97,18 @@ func BuildImage() {
 		if err != nil {
 			panic(err)
 		}
-		print(string(buf[0:n]))
+		isStream := bytes.HasPrefix(buf[0:n], []byte("{\"stream\""))
+		isAux := bytes.HasPrefix(buf[0:n], []byte("{\"aux\""))
+
+		if isStream {
+			json.Unmarshal(buf[0:n], &stream)
+			// str := strings.Trim(stream.Stream, "\r\n")
+			print(stream.Stream)
+		}
+
+		if isAux {
+			json.Unmarshal(buf[0:n], &aux)
+		}
 
 		// Discard two bytes
 		_, err = reader.Discard(2)
@@ -84,4 +116,7 @@ func BuildImage() {
 			panic(err)
 		}
 	}
+	id := aux.Aux.ID
+	println("Image id", id)
+	return id
 }
