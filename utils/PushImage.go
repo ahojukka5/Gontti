@@ -24,11 +24,13 @@ func PushImage(name string, XRA string) {
 	l4 := "Accept: */*"
 	l5 := "Content-Type: application/json"
 	l6 := "X-Registry-Auth: " + XRA
+	l62 := "X-Registry-Auth: ***"
 	msg := l1 + "\r\n" + l2 + "\r\n" + l3 + "\r\n" + l4 + "\r\n" + l5 + "\r\n" + l6 + "\r\n\r\n"
+	msg2 := l1 + "\r\n" + l2 + "\r\n" + l3 + "\r\n" + l4 + "\r\n" + l5 + "\r\n" + l62 + "\r\n\r\n"
 
 	println("## Send message to socket:")
 	println("---")
-	println(msg)
+	println(msg2)
 	println("---")
 
 	// Send message to socket
